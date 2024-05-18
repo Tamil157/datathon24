@@ -16,7 +16,7 @@ const [images, setImages] = useState([]);
 
 const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3001/submitcomplaint', {name, phonenumber, address, distname, review, images })
+    axios.post('http://13.60.97.195:3001/submitcomplaint', {name, phonenumber, address, distname, review, images })
     .then(res => {
     console.log(res);
     setName('')
