@@ -13,7 +13,7 @@ app.use(express.json()) // transfered data (from backend to frontend ) => json f
 app.use(cors())
 
 
-mongoose.connect("mongodb://localhost:27017/authority")
+mongoose.connect("mongodb+srv://tamilarasand:uzMo3Zc7s0nlfMYC@authority.bai3y9l.mongodb.net/?retryWrites=true&w=majority&appName=authority")
 
 app.post("/login",(req,res)=>{
     const {email,password} = req.body;
