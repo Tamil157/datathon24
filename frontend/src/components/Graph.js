@@ -21,14 +21,14 @@ const Graph = () => {
       formData.append('attribute1', attribute1);
       formData.append('attribute2', attribute2);
 
-      const response = await axios.post('http://127.0.0.1:5000/plot', formData, {
+      const response = await axios.post('http://13.60.97.195:5000/plot', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       const plotFilename = response.data.plot_filename;
       console.log('Plot filename:', plotFilename); // Debug log
-      setPlotUrl(`http://127.0.0.1:5000/uploads/${plotFilename}`);
+      setPlotUrl(`http://13.60.97.195:5000/uploads/${plotFilename}`);
     } catch (error) {
       console.error('Error:', error);
     }
