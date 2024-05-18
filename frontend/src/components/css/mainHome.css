@@ -1,0 +1,126 @@
+    body {
+        background-color: black;
+        padding: 20px;
+    }
+
+    .welcome-head{
+        font-size: 70px;
+        color: #86C232;
+        
+    }
+
+    .animate-container{
+        display: inline-block;
+    }
+
+    .head-content{
+        color: #474b4f;
+        margin-top: 5px;
+        font-size: 40px;
+        font-weight: bold;
+        border-right: 4px solid;
+        border-color: white;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        animation:
+             typing 2s steps(44),
+             cursor .4s step-end infinite alternate;
+    }
+
+    @keyframes cursor {
+        50% { border-color: transparent}  
+    }
+
+    @keyframes typing {
+        from { width: 0}
+    }
+
+    .mission{
+        color: white;
+        font-size: 30px;
+        width: 900px;
+        margin-top: 20px;
+        line-height: 55px;
+    }
+
+    .welcome-container{
+        margin-top: 200px;
+        margin-left: 40px;
+    }
+
+    .welcome-container button{
+        margin-top: 30px;
+        margin-right: 20px;
+        height: 60px;
+        width: 100px;
+        border-radius: 10px;
+        font-size: 20px;
+    }
+
+    .user-btn{
+        background-color: #86C232;
+        color: white;
+        font-weight: bold;
+        border: none;
+    }
+
+    .admin-btn{
+        border-color: #86C232;
+        background-color: black;
+        color: #86C232;
+        border-width: 3px;
+        border-style: solid;
+        font-weight: bold;
+    }
+    
+    .user-btn:hover{
+        opacity: 0.72;
+    }
+
+    .admin-btn:hover{
+        opacity: 0.72;
+    }
+
+    .user-btn:active{
+        opacity: 0.5;
+    }
+
+    .admin-btn:active{
+        opacity: 0.5;
+    }
+
+   .user-link{
+    color: white;
+    text-decoration: none;
+   }
+
+   .admin-link{
+    text-decoration: none;
+    color: #86C232;
+   }
+
+   .aboutus-wrapper{
+    margin-top: 200px;
+    color: #86C232;
+    
+   }
+
+   .aboutus-content{
+    color: grey;
+    line-height: 40px;
+    font-size: 20px;
+
+    text-align: center;
+   }
+
+   .contact-detail{
+    color: grey;
+    font-size: 20px;
+   }
+
+   .aboutus{
+    text-align: center;
+   }
+
+

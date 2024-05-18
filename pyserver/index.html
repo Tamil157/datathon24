@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Data Analysis</title>
+</head>
+<body>
+    <h1>CSV Data Analysis</h1>
+    <form action="/plot" method="post" enctype="multipart/form-data">
+        <label for="csv_file">CSV File:</label>
+        <input type="file" id="csv_file" name="csv_file"><br><br>
+        <label for="attribute1">Attribute 1:</label>
+        <input type="text" id="attribute1" name="attribute1"><br><br>
+        <label for="attribute2">Attribute 2:</label>
+        <input type="text" id="attribute2" name="attribute2"><br><br>
+        <button type="submit">Plot Chart</button>
+    </form>
+    {% if plot_filename %}
+    <img src="{{ url_for('uploaded_file', filename=plot_filename) }}" alt="Plot">
+    {% endif %}
+</body>
+</html>

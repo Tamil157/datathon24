@@ -1,0 +1,129 @@
+.complaint-form {
+    width: 600px;
+    height: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+.complaint-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #86C232;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="email"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-group input[type="file"] {
+    display: none;
+}
+
+.form-group .file-upload label {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form-group .file-upload label:hover {
+    background-color: #0056b3;
+}
+
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    resize: none;
+}
+
+.form-group button[type="submit"] {
+    padding: 10px 20px;
+    background-color: #86C232;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form-group button[type="submit"]:hover {
+    background-color: #86C232;
+}
+
+.form-group button:active{
+    opacity: 0.7;
+}
+
+.images-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.images-container img {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.disclaimer-tag{
+    text-align: center;
+    color: #86C232;
+}
+
+hr{
+    border-color:#86C232;
+    margin-top: 200px;
+}
+
+.disclaimer-content{
+    color: white;
+    text-align: center;
+    font-size: 25px;
+}
+
+label{
+    color: white;
+    cursor: pointer; 
+}
+
+.textarea{
+    border: none;
+    outline: none;
+}
+
+.complaint-body{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: cente;
+    justify-content: center;
+}
+
+
+
+
+
