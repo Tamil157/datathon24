@@ -1,8 +1,6 @@
-#!/bin/bash
-# Update pip and setuptools
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
-pip install --upgrade pip setuptools
+export PATH="$PATH:/python312/bin"
 
 # Install Python dependencies
 cd pyserver
