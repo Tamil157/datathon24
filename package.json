@@ -20,12 +20,13 @@
   },
   "scripts": {
     "start": "concurrently \"npm run start:react\" \"npm run start:server\" \"npm run start:pyserver\"",
-    "install-pip": "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py",
+    "install-pip": "curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3 get-pip.py",
     "start:react": "cd frontend && npm start",
     "start:server": "cd server && npm start",
     "start:pyserver": "cd pyserver && python3 model.py",
-    "build": "npm run build:frontend && npm run build:pyserver",
+    "build": "npm run build:frontend && npm run build:pyserver && npm run build:server",
     "build:frontend": "cd frontend && npm run build",
-    "build:pyserver": "npm run install-pip && cd pyserver && pip install -r requirements.txt"
+    "build:pyserver": "npm run install-pip && cd pyserver && pip3 install -r requirements.txt",
+    "build:server": "cd server && npm run build"
   }
 }
