@@ -8,7 +8,6 @@ import seaborn as sns
 import os
 import numpy as np
 import pickle
-from collections import defaultdict
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
@@ -19,6 +18,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route('/')
 def index():
     return "Flask Server is running."
+
 def save_plot(filename):
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
@@ -36,18 +36,28 @@ def plot_chart():
         attribute1 = request.form['attribute1']
         attribute2 = request.form['attribute2']
 
-        # Read the entire dataset
-        data = pd.read_csv(csv_filename)
-        
-        if attribute1 == attribute2:
-            return "Attribute 1 and Attribute 2 should be different", 400
+        # Read the dataset in chunks
+        chunksize = 10000
+        attribute1_exists, attribute2_exists = False, False
+        for chunk in pd.read_csv(csv_filename, chunksize=chunksize):
+            if attribute1 in chunk.columns:
+                attribute1_exists = True
+            if attribute2 in chunk.columns:
+                attribute2_exists = True
+            if attribute1_exists and attribute2_exists:
+                break
 
-        # Check if the attributes exist in the dataset
-        if attribute1 not in data.columns:
+        if not attribute1_exists:
             return f"Attribute '{attribute1}' not found in the dataset", 400
 
-        if attribute2 not in data.columns:
+        if not attribute2_exists:
             return f"Attribute '{attribute2}' not found in the dataset", 400
+
+        # Read the entire dataset
+        data = pd.concat(pd.read_csv(csv_filename, chunksize=chunksize), ignore_index=True)
+
+        if attribute1 == attribute2:
+            return "Attribute 1 and Attribute 2 should be different", 400
 
         # Use seaborn's countplot for counting occurrences of categories
         plt.figure(figsize=(18, 10))
@@ -78,44 +88,36 @@ def plot_chart():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+def get_top_unit_names(data, top_n=5):
+    unitname_counts = data['UNITNAME'].value_counts().nlargest(top_n).index.tolist()
+    return unitname_counts
+
 # Data preparation for top-unit-names
-csv_file_path = os.path.join(os.path.dirname(__file__), 'CopyofAccidentReports.csv')
-data = pd.read_csv(csv_file_path)
-unitname_counts = defaultdict(list)
-for unitname in data['UNITNAME']:
-    unitname_counts[unitname].append(1)
-unitname_counts = {key: sum(value) for key, value in unitname_counts.items()}
-
-top = []
-for i in range(5):
-    values = unitname_counts.values()
-    a = max(values)
-    for key, val in unitname_counts.items():
-        if val == a:
-            top.append(key)
-            break
-    unitname_counts.pop(key)
-
-top_cities = top
+csv_file_path = os.path.join(os.path.dirname(__file__), "Copy of AccidentReports.csv")
+data = pd.read_csv(csv_file_path, usecols=['UNITNAME'])
+top_cities = get_top_unit_names(data)
 
 @app.route('/top-unit-names')
 def top_unit_names():
     return jsonify({'top_unit_names': top_cities})
 
-# Load models
+# Lazy loading model storage
 models = {}
-model_files = {
-    "road_type": "road_type.pkl",
-    "road_surface": "road_surface.pkl",
-    "weather": "weather.pkl",  
-    "light_conditions": "light.pkl",
-    "pedestrian": "pedestrain.pkl",
-    "severity": "severity.pkl"
-}
 
-for feature, file in model_files.items():
-    with open(file, "rb") as f:
-        models[feature] = pickle.load(f)
+# Load models on demand
+def load_model(feature):
+    model_files = {
+        "road_type": "road_type.pkl",
+        "road_surface": "road_surface.pkl",
+        "weather": "weather.pkl",  
+        "light_conditions": "light.pkl",
+        "pedestrian": "pedestrain.pkl",
+        "severity": "severity.pkl"
+    }
+    if feature not in models:
+        with open(model_files[feature], "rb") as f:
+            models[feature] = pickle.load(f)
+    return models[feature]
 
 @app.route("/predict_road_type", methods=["POST"])
 def predict_road_type():
@@ -123,7 +125,8 @@ def predict_road_type():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        prediction = models["road_type"].predict(features)
+        model = load_model("road_type")
+        prediction = model.predict(features)
         road_types = {
             4: 'Highway',
             3: 'Main road',
@@ -146,7 +149,8 @@ def predict_road_surface():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        prediction = models["road_surface"].predict(features)
+        model = load_model("road_surface")
+        prediction = model.predict(features)
         road_conditions = {
             5: "Excellent",
             4: "Very Good",
@@ -181,7 +185,8 @@ def predict_weather():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        prediction = models["weather"].predict(features)
+        model = load_model("weather")
+        prediction = model.predict(features)
         weather = {
             1: "Clear sky",
             2: "Partly cloudy",
@@ -223,7 +228,8 @@ def predict_light_conditions():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        prediction = models["light_conditions"].predict(features)
+        model = load_model("light_conditions")
+        prediction = model.predict(features)
         condition = {
             1: "Daylight: Street lights present",
             4: "Daylight: Street lights present and lit",
@@ -236,8 +242,8 @@ def predict_light_conditions():
             1: "Install additional street lights for better visibility during daylight hours.",
             4: "Ensure all street lights are functioning properly during daylight hours.",
             7: "Maintain street lights to ensure they remain lit during darkness, improving visibility.",
-            5: "Repair or replace unlit street lights to improve visibility during darkness.",
-            6: "Install street lighting infrastructure to illuminate areas currently lacking lighting during darkness."
+             5: "Repair or replace unlit street lights to improve visibility during darkness.",
+             6: "Install street lighting infrastructure to illuminate areas currently lacking lighting during darkness."
         }
 
         predict = prediction[0]
@@ -255,7 +261,8 @@ def predict_pedestrian():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        prediction = models["pedestrian"].predict(features)
+        model = load_model("pedestrian")
+        prediction = model.predict(features)
         code = prediction[0]
         if code == 0:
             value = "Uncontrollable"
@@ -283,7 +290,8 @@ def predict_severity():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        prediction = models["severity"].predict(features)
+        model = load_model("severity")
+        prediction = model.predict(features)
         severity = {
             1: "Minor",
             2: "Moderate",
