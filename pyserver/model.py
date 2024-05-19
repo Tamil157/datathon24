@@ -1,3 +1,26 @@
+from flask import Flask, request, jsonify
+import joblib
+import os
+
+app = Flask(__name__)
+
+model = None
+
+def load_model():
+    global model
+    if model is None:
+        model = joblib.load('path_to_your_model.pkl')
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    load_model()
+    data = request.json
+    prediction = model.predict([data['features']])
+    return jsonify({'prediction': prediction.tolist()})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 from flask import Flask, request, send_from_directory, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -101,9 +124,6 @@ top_cities = get_top_unit_names(data)
 def top_unit_names():
     return jsonify({'top_unit_names': top_cities})
 
-# Lazy loading model storage
-models = {}
-
 # Load models on demand
 def load_model(feature):
     model_files = {
@@ -114,10 +134,9 @@ def load_model(feature):
         "pedestrian": "pedestrain.pkl",
         "severity": "severity.pkl"
     }
-    if feature not in models:
-        with open(model_files[feature], "rb") as f:
-            models[feature] = pickle.load(f)
-    return models[feature]
+    with open(model_files[feature], "rb") as f:
+        model = pickle.load(f)
+    return model
 
 @app.route("/predict_road_type", methods=["POST"])
 def predict_road_type():
@@ -242,8 +261,8 @@ def predict_light_conditions():
             1: "Install additional street lights for better visibility during daylight hours.",
             4: "Ensure all street lights are functioning properly during daylight hours.",
             7: "Maintain street lights to ensure they remain lit during darkness, improving visibility.",
-             5: "Repair or replace unlit street lights to improve visibility during darkness.",
-             6: "Install street lighting infrastructure to illuminate areas currently lacking lighting during darkness."
+            5: "Repair or replace unlit street lights to improve visibility during darkness.",
+            6: "Install street lighting infrastructure to illuminate areas currently lacking lighting during darkness."
         }
 
         predict = prediction[0]
