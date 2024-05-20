@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 # Create and activate virtual environment
 python3 -m venv venv
 source venv/bin/activate
@@ -25,3 +27,8 @@ cd server
 npm install
 npm run build
 cd ..
+
+# Move frontend build to dist (if needed)
+if [ -d "frontend/build" ]; then
+    mv frontend/build frontend/dist
+fi
