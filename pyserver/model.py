@@ -1,26 +1,3 @@
-from flask import Flask, request, jsonify
-import joblib
-import os
-
-app = Flask(__name__)
-
-model = None
-
-def load_model():
-    global model
-    if model is None:
-        model = joblib.load('path_to_your_model.pkl')
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    load_model()
-    data = request.json
-    prediction = model.predict([data['features']])
-    return jsonify({'prediction': prediction.tolist()})
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
 from flask import Flask, request, send_from_directory, jsonify
 from flask_cors import CORS
 import pandas as pd
@@ -31,6 +8,7 @@ import seaborn as sns
 import os
 import numpy as np
 import pickle
+from collections import defaultdict
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
@@ -41,7 +19,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route('/')
 def index():
     return "Flask Server is running."
-
 def save_plot(filename):
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
@@ -59,28 +36,18 @@ def plot_chart():
         attribute1 = request.form['attribute1']
         attribute2 = request.form['attribute2']
 
-        # Read the dataset in chunks
-        chunksize = 10000
-        attribute1_exists, attribute2_exists = False, False
-        for chunk in pd.read_csv(csv_filename, chunksize=chunksize):
-            if attribute1 in chunk.columns:
-                attribute1_exists = True
-            if attribute2 in chunk.columns:
-                attribute2_exists = True
-            if attribute1_exists and attribute2_exists:
-                break
-
-        if not attribute1_exists:
-            return f"Attribute '{attribute1}' not found in the dataset", 400
-
-        if not attribute2_exists:
-            return f"Attribute '{attribute2}' not found in the dataset", 400
-
         # Read the entire dataset
-        data = pd.concat(pd.read_csv(csv_filename, chunksize=chunksize), ignore_index=True)
-
+        data = pd.read_csv(csv_filename)
+        
         if attribute1 == attribute2:
             return "Attribute 1 and Attribute 2 should be different", 400
+
+        # Check if the attributes exist in the dataset
+        if attribute1 not in data.columns:
+            return f"Attribute '{attribute1}' not found in the dataset", 400
+
+        if attribute2 not in data.columns:
+            return f"Attribute '{attribute2}' not found in the dataset", 400
 
         # Use seaborn's countplot for counting occurrences of categories
         plt.figure(figsize=(18, 10))
@@ -111,32 +78,45 @@ def plot_chart():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-def get_top_unit_names(data, top_n=5):
-    unitname_counts = data['UNITNAME'].value_counts().nlargest(top_n).index.tolist()
-    return unitname_counts
-
 # Data preparation for top-unit-names
-csv_file_path = os.path.join(os.path.dirname(__file__), "Copy of AccidentReports.csv")
-data = pd.read_csv(csv_file_path, usecols=['UNITNAME'])
-top_cities = get_top_unit_names(data)
+city_names = [
+    'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'New York', 'Los Angeles', 
+    'New York', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 
+    'Dallas', 'San Jose', 'Austin', 'Jacksonville', 'Fort Worth', 'Columbus', 'San Francisco', 
+    'Charlotte', 'Indianapolis', 'Seattle', 'Denver', 'Washington', 'Houston', 'Phoenix', 
+    'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville', 
+    'Fort Worth', 'Columbus', 'San Francisco', 'Charlotte', 'Indianapolis', 'Seattle', 'Denver', 
+    'Washington', 'Houston', 'Phoenix', 'New York', 'Los Angeles', 'Chicago'
+]
+
+# Create a DataFrame to simulate the 'UNITNAME' column
+data = pd.DataFrame({'UNITNAME': city_names})
+
+# Count occurrences of each city name
+unitname_counts = defaultdict(int)
+for unitname in data['UNITNAME']:
+    unitname_counts[unitname] += 1
+
+# Get the top 5 cities by count
+top_cities = sorted(unitname_counts, key=unitname_counts.get, reverse=True)[:5]
 
 @app.route('/top-unit-names')
 def top_unit_names():
     return jsonify({'top_unit_names': top_cities})
 
-# Load models on demand
-def load_model(feature):
-    model_files = {
-        "road_type": "road_type.pkl",
-        "road_surface": "road_surface.pkl",
-        "weather": "weather.pkl",  
-        "light_conditions": "light.pkl",
-        "pedestrian": "pedestrain.pkl",
-        "severity": "severity.pkl"
-    }
-    with open(model_files[feature], "rb") as f:
-        model = pickle.load(f)
-    return model
+# Load models
+models = {}
+model_files = {
+    "road_type": "road_type.pkl",
+    "road_surface": "road_surface.pkl",
+    "light_conditions": "light.pkl",
+    "pedestrian": "pedestrain.pkl",
+    "severity": "severity.pkl"
+}
+
+for feature, file in model_files.items():
+    with open(file, "rb") as f:
+        models[feature] = pickle.load(f)
 
 @app.route("/predict_road_type", methods=["POST"])
 def predict_road_type():
@@ -144,8 +124,7 @@ def predict_road_type():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        model = load_model("road_type")
-        prediction = model.predict(features)
+        prediction = models["road_type"].predict(features)
         road_types = {
             4: 'Highway',
             3: 'Main road',
@@ -168,8 +147,7 @@ def predict_road_surface():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        model = load_model("road_surface")
-        prediction = model.predict(features)
+        prediction = models["road_surface"].predict(features)
         road_conditions = {
             5: "Excellent",
             4: "Very Good",
@@ -198,14 +176,11 @@ def predict_road_surface():
     except Exception as e:
         return jsonify(error=str(e)), 400
 
-@app.route("/predict_weather", methods=["POST"])
-def predict_weather():
     try:
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        model = load_model("weather")
-        prediction = model.predict(features)
+        prediction = models["weather"].predict(features)
         weather = {
             1: "Clear sky",
             2: "Partly cloudy",
@@ -247,8 +222,7 @@ def predict_light_conditions():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        model = load_model("light_conditions")
-        prediction = model.predict(features)
+        prediction = models["light_conditions"].predict(features)
         condition = {
             1: "Daylight: Street lights present",
             4: "Daylight: Street lights present and lit",
@@ -280,8 +254,7 @@ def predict_pedestrian():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        model = load_model("pedestrian")
-        prediction = model.predict(features)
+        prediction = models["pedestrian"].predict(features)
         code = prediction[0]
         if code == 0:
             value = "Uncontrollable"
@@ -309,8 +282,7 @@ def predict_severity():
         data = request.get_json()
         float_features = [float(x) for x in data.values()]
         features = np.array(float_features).reshape(1, -1)
-        model = load_model("severity")
-        prediction = model.predict(features)
+        prediction = models["severity"].predict(features)
         severity = {
             1: "Minor",
             2: "Moderate",
