@@ -17,7 +17,7 @@ export default function Navbar(){
                     <a className="nav-info" href="/show">COMPLAINTS</a>
                     <a className="nav-info" href="/top">TOP5</a>
                     <a className="nav-info" href="/map">MAP</a>
-                    <a className="nav-info" href="/graph">GRAPH</a>
+                    <a className="nav-info" href="/data">DATA-ANALYSIS</a>
                     <button onClick={doLogout}>LOGOUT</button>
                 </ul>
             </div>

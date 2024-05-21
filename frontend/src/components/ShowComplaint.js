@@ -12,7 +12,7 @@ const ShowComplaints = () => {
 
  	const fetchComplaints = async () => {
 		try {
-			const response = await axios.get('http://13.60.97.195:3001/complaints');
+			const response = await axios.get('http://localhost:3001/complaints');
 			setComplaints(response.data.map(complaint => ({...complaint,currentImageIndex: 0 // Initialize current image index for each complaint
 		})));
 		} catch (error) {

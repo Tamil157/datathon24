@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import axios from "axios";
 import './css/pyhome.css'
 import Navbar from "./Nav";
@@ -6,6 +6,8 @@ export default function PyHome() {
     const [predictionText, setPredictionText] = useState("");
     const [predictionText1, setPredictionText1] = useState("");
     const [predictionText11, setPredictionText11] = useState("");
+    const [predictionText2, setPredictionText2] = useState("");
+    const [predictionText21, setPredictionText21] = useState("");
     const [predictionText3, setPredictionText3] = useState("");
     const [predictionText31, setPredictionText31] = useState("");
     const [predictionText4, setPredictionText4] = useState("");
@@ -57,7 +59,22 @@ export default function PyHome() {
             setPredictionText1("Error predicting road surface: " + error.response.data.prediction_text1);
         }
     };
-  
+    const handleSubmitWeather = async (event) => {
+        event.preventDefault();
+        try {
+            const response = await axios.post("/predict_weather", {
+                longitude: event.target.elements.longitude.value,
+                latitude: event.target.elements.latitude.value,
+                first_road_Class : event.target.elements.first_road_class.value,
+                second_road_Class : event.target.elements.second_road_class.value
+            });
+            setPredictionText2(response.data.prediction_text2);
+            setPredictionText21(response.data.prediction_text21);
+        } catch (error) {
+            console.error("Error predicting weather:", error);
+            setPredictionText2("Error predicting weather: " + error.response.data.prediction_text2);
+        }
+    };
     const handleSubmitLight = async (event) => {
         event.preventDefault();
         try {
@@ -157,6 +174,18 @@ export default function PyHome() {
                 </form>
                 <hr></hr>
             
+                {/* Weather Prediction Form */}
+                <form onSubmit={handleSubmitWeather} className="form">
+                    <h1>Weather Prediction</h1>
+                    <input type="text" placeholder="Longitude" name="longitude" required />
+                    <input type="text" placeholder="Latitude" name="latitude" required />
+                    <input type="text" placeholder="1st Road Class" name="first_road_class" required />
+                    <input type="text" placeholder="2nd Road Class" name="second_road_class" required />
+                    <button type="submit">Predict</button>
+                    <p className="result-tag">Weather: <p className="result">{predictionText2}</p></p>
+                    <p className="result-tag">Improvement: <p className="result">{predictionText21}</p></p>
+                </form>
+                <hr></hr>
         
                 {/* Light Prediction Form */}
                 <form onSubmit={handleSubmitLight} className="form">

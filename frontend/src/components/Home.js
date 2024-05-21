@@ -1,4 +1,7 @@
 import React from 'react';
+import Complaint from './complaint';
+import Login from './Login';
+import { Link } from 'react-router-dom';
 import mainHome from './css/mainHome.css'
 
 const Home = () => {

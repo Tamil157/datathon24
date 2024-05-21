@@ -10,6 +10,9 @@ import Top from "./components/Top";
 import PyHome from "./components/PyHome";
 import Map from "./components/Map";
 import Graph from "./components/Graph";
+import DataAnalysis from "./components/dataAnalysis";
+import Images from "./components/images";
+
 function App() {
   return (
     <div className="App">
@@ -25,6 +28,9 @@ function App() {
           <Route path='/submitcomplaint' element={<Complaint/>}/>
           <Route path='map' element={<Map/>}/>
           <Route path='/graph' element={<Graph/>}/>
+          <Route path='/data' element={<DataAnalysis />}/>
+          <Route path='/images' element={<Images />}/>
+
         </Routes>
       </Router>
     </div>

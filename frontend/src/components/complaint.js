@@ -5,7 +5,7 @@ import './css/complaint.css'
 import {toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function Complaint(){
+export default function Complaint(){ 
 
 const [name,setName] = useState('')
 const [phonenumber,setPhonenumber] = useState('')
@@ -16,7 +16,7 @@ const [images, setImages] = useState([]);
 
 const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('https://datathon24-server.vercel.app/api/submitcomplaint', {name, phonenumber, address, distname, review, images })
+    axios.post('http://localhost:3001/submitcomplaint', {name, phonenumber, address, distname, review, images })
     .then(res => {
     console.log(res);
     setName('')
